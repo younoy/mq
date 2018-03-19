@@ -34,24 +34,33 @@
 ###应用场景
 [官网上](http://www.rabbitmq.com/getstarted.html)或者[应用场景](https://www.cnblogs.com/DaBing0806/p/6680766.html)
 1. Hello Word  ===》 秒杀活动
+![helloWorld](images/rabbitmq1.png)
 控制队列长度，当请求来了，往队列里写入，超过队列的长度，就返回失败
 2. work queues 异步处理  ===> goblin接口计费项目
+![helloWorld](images/rabbitmq2.png)
 将耗时的消息处理通过队列分配给多个consumer来处理，我们称此处的consumer为worker，我们将此处的queue称为Task Queue，其目的是为了避免资源密集型的task的同步处理，也即立即处理task并等待完成。相反，调度task使其稍后被处理。也即把task封装进message并发送到task queue，worker进程在后台运行，从task queue取出task并执行job，若运行了多个worker，则task可在多个worker间分配。
 3. Publish/Subscribe  ====》 订单系统
+![helloWorld](images/rabbitmq3.png)
 现在我们设法将一个message传递给多个consumer。这种模式被称为publish/subscribe。当订单系统下完单后，把数据消息写入消息队列中，库存系统和发货系统同时订阅这个消息队列，思想上和纯API系统调用类似，但是，消息队列RabbitMq本身的强大功能，会帮我们做大量的出错善后处理，还是，假设下单成功，库存失败，发货成功，当我们修复库存的时候，不需要任何管数据的不一致性，因为库存队列未被处理的消息，会直接发送到库存系统，库存系统会进行处理。实现了应用的大幅度解耦
 4. Routing  ===》 新闻平台的订阅分类
+![helloWorld](images/rabbitmq4.png)
 只把指定的message类型发送给其subscriber，比如，只把error message写到log file而将所有log message显示在控制台。
 5. topic
+![helloWorld](images/rabbitmq5.png)
 6. RPC  ===》 
+![helloWorld](images/rabbitmq6.png)
 如果我们task是想在远程的计算机上运行一个函数并等待返回结果呢。这根场景1中的描述是一个完全不同的故事。这一模式被称为远程过程调用。
 
 ##ActiveMQ
 JMS，即Java Message Service，通过面向消息中间件（MOM：Message Oriented Middleware）：发送者把消息发送给消息服务器，消息服务器将消息存放在若干队列/主题中，在合适的时候，消息服务器会将消息转发给接受者。在这个过程中，发送和接受是异步的，也就是发送无需等待，而且发送者和接受者的生命周期也没有必然关系；在pub/sub模式下，也可以完成一对多的通信，即让一个消息有多个接受者。
+![helloWorld](images/activemq都将其对象化.png)
 ==》JMS规范：
 Provider/MessageProvider：生产者
 Consumer/MessageConsumer：消费者
 PTP：Point To Point，点对点通信消息模型
+![helloWorld](images/P2P.png)
 Pub/Sub：Publish/Subscribe，发布订阅消息模型
+![helloWorld](images/PS.png)
 Queue：队列，目标类型之一，和PTP结合
 Topic：主题，目标类型之一，和Pub/Sub结合
 ConnectionFactory：连接工厂，JMS用它创建连接
@@ -61,6 +70,7 @@ Session：会话，由Connection创建，实质上就是发送、接受消息的
 
 ##kafka
 [Kafka](https://zhuanlan.zhihu.com/p/27551928)是分布式发布-订阅消息系统,它最初由 LinkedIn 公司开发，使用 Scala语言编写,之后成为 Apache 项目的一部分。在Kafka集群中，没有“中心主节点”的概念，集群中所有的服务器都是对等的，因此，可以在不做任何配置的更改的情况下实现服务器的的添加与删除，同样的消息的生产者和消费者也能够做到随意重启和机器的上下线。
+![helloWorld](images/kafka.png)
 1、消息生产者：即：Producer，是消息的产生的源头，负责生成消息并发送到Kafka服务器上。
 2、消息消费者：即：Consumer，是消息的使用方，负责消费Kafka服务器上的消息。
 3、主题：即：Topic，由用户定义并配置在Kafka服务器，用于建立生产者和消息者之间的订阅关系：生产者发送消息到指定的Topic下，消息者从这个Topic下消费消息。
@@ -92,6 +102,20 @@ at least once:消费者fetch消息，然后处理消息，然后保存offset.如
 3、exactly once:消息只会发送一次。
 exactly once: kafka中并没有严格的去实现(基于2阶段提交，事务)，我们认为这种策略在kafka中是没有必要的。
 注：通常情况下"at-least-once"是我们首选。(相比at most once而言，重复接收数据总比丢失数据要好)。
+
+##mq比较
+![helloWorld](images/各大MQ对比.png)
+所做的测试(都是最基本的配置,没有采用分布式和优化)：
+activemq默认配置的jvm堆栈到64w条左右
+60w数据：
+
+mq | 入队 | 出对 
+- | :-: | -: 
+Rabbitmq | 9s | 8s 
+activemq | 13s | 11s 
+kafka | 1s | 2s
+
+
 
 
 
