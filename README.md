@@ -130,6 +130,7 @@ exactly once: kafka中并没有严格的去实现(基于2阶段提交，事务)�
 ![helloWorld](images/各大MQ对比.png)
 所做的测试(都是最基本的配置,没有采用分布式和优化)：
 activemq默认配置的jvm堆栈到64w条左右
+![helloWorld](images/activemq-60w.png)
 60w数据：
 
 | mq | 入队 | 出对 
