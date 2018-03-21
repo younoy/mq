@@ -137,3 +137,7 @@ activemq默认配置的jvm堆栈到64w条左右
 | Rabbitmq | 9s | 8s 
 | activemq | 13s | 11s 
 | kafka | 1s | 2s
+### 测试的数据图
+![activemq](images/activemq-0321.png)
+![rabbitmq](images/rabbitmq-0321.png)
+![kafka](images/kafka-cmd-test.png)
