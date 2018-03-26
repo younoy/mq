@@ -18,10 +18,12 @@
 1. direct
 
 默认交换机是一个预先定义的direct交换机，没有名字，经常被空字符串“”来引用。 当你使用默认交换机时，你的消息会被路由到名字和消息的路由键相等的队列中。每个队列都自动绑定到默认交换机，binding key就是队列的名字
+
 2. fanout
 
 Fanout交换机把收到的消息复制和路由到所有绑定它的队列上，不管routing key/pattern。提供的那些Key都会被忽视。
 Fanout在一个消息需要倍发送到一个或多个队列中，用不同的方法去处理时，是有用的。
+
 3. topic
 
 Topic交换机根据路由键和routing pattern之间的通配符匹配来把消息路由到一个或多个队列中。routing pattern是queue binding所指定的（类似于上文的binding key）。
