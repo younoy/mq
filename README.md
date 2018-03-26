@@ -8,6 +8,24 @@
 项目中应用到的消息队列rabbitmq：
 ![Rabbitmq架构](images/rabbitmq.png)
 
+### VirtualHost：
+像mysql有数据库的概念并且可以指定用户对库和表等操作的权限。那RabbitMQ呢？RabbitMQ也有类似的权限管理。在RabbitMQ中可以虚拟消息服务器VirtualHost，每个VirtualHost相当月一个相对独立的RabbitMQ服务器，每个VirtualHost之间是相互隔离的。exchange、queue、message不能互通。
+
+### exchanges：
+需要注意的是，如果将消息发送到一个没有队列绑定的exchange上面，那么该消息将会丢失，这是因为在rabbitMQ中exchange不具备存储消息的能力，只有队列具备存储消息的能力。
+要了解RabbitMQ的<font color='font'>路由机制</font>，exchange是一个关键。exchange可以叫做交换机，也似乎可以叫做路由器，反正它是用来选择路由的。RabbitMQ的核心思想就是消息的发布者不是直接把消息发送到目标队列中的，事实上，通常它并不知道消息要发到哪个队列中，它只知道把消息队列发送到exchange中。exchange一边接收发送者发过来的消息，而另一边则把消息发送到目标队列中去。exchange一定知道哪些队列需要接收这个消息，是加到一个队列里还是加到好几个队列里，还是直接扔掉。
+在message到达Exchange后，Exchange会根据route规则进入对应的Queue中，message可能进入一个Queue也可能进入对应多个Queue，至于进入哪个Queue或者是说哪个Queue都不进入，这要依据ExChange的ExchangeType和Exchange所绑定的路由规则，实现AMQP0.9.1协议的RabbitMQ Broker提供了四种ExChangeType。
+1. direct
+
+默认交换机是一个预先定义的direct交换机，没有名字，经常被空字符串“”来引用。 当你使用默认交换机时，你的消息会被路由到名字和消息的路由键相等的队列中。每个队列都自动绑定到默认交换机，binding key就是队列的名字
+2. fanout
+
+Fanout交换机把收到的消息复制和路由到所有绑定它的队列上，不管routing key/pattern。提供的那些Key都会被忽视。
+Fanout在一个消息需要倍发送到一个或多个队列中，用不同的方法去处理时，是有用的。
+3. topic
+
+Topic交换机根据路由键和routing pattern之间的通配符匹配来把消息路由到一个或多个队列中。routing pattern是queue binding所指定的（类似于上文的binding key）。
+
 &emsp;&emsp;简单例子：生产者和消费者的例子
 &emsp;&emsp;收发请求可以啦，然后再来看看其他的问题及其解决方案。
 ### 问题：
@@ -27,12 +45,6 @@
 如果RabbitMQ服务器挂了呢？ 
 ===》队列持久化，消息持久化，Exchanges持久化
 
-### exchanges：
-在message到达Exchange后，Exchange会根据route规则进入对应的Queue中，message可能进入一个Queue也可能进入对应多个Queue，至于进入哪个Queue或者是说哪个Queue都不进入，这要依据ExChange的ExchangeType和Exchange所绑定的路由规则，实现AMQP0.9.1协议的RabbitMQ Broker提供了四种ExChangeType。
-1. direct
-2. fanout
-3. topic
-
 ### 应用场景
 [官网上](http://www.rabbitmq.com/getstarted.html)或者[应用场景](https://www.cnblogs.com/DaBing0806/p/6680766.html)
 1. Hello Word  ===》 秒杀活动
@@ -40,6 +52,7 @@
 ![helloWorld](images/rabbitmq1.png)
 
 控制队列长度，当请求来了，往队列里写入，超过队列的长度，就返回失败
+
 2. work queues 异步处理  ===> goblin接口计费项目
 
 ![helloWorld](images/rabbitmq2.png)
@@ -51,6 +64,7 @@
 ![helloWorld](images/rabbitmq3.png)
 
 现在我们设法将一个message传递给多个consumer。这种模式被称为publish/subscribe。当订单系统下完单后，把数据消息写入消息队列中，库存系统和发货系统同时订阅这个消息队列，思想上和纯API系统调用类似，但是，消息队列RabbitMq本身的强大功能，会帮我们做大量的出错善后处理，还是，假设下单成功，库存失败，发货成功，当我们修复库存的时候，不需要任何管数据的不一致性，因为库存队列未被处理的消息，会直接发送到库存系统，库存系统会进行处理。实现了应用的大幅度解耦
+
 4. Routing  ===》 新闻平台的订阅分类
 
 ![helloWorld](images/rabbitmq4.png)
